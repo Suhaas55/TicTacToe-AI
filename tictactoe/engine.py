@@ -50,10 +50,16 @@ class Engine:
             return min_eval, best_move
 
     def evaluate_board(self, board: Board, depth: int) -> Score:
+        """changing here because
+        Instead of giving this AI a positive value when it forms three in a row, we now return a 
+        negative value. This reflects the risk for the initial player in this wild tictactoe three in a row first 
+        may allow the opponent to counter and win. And vice-versa if the opponent forms three in a 
+        row, we are returning a positive value.
+        """
         if board.winner() == self.ai:
-            return board.size**2 - depth
+            return -1 * (board.size**2 + 1 - depth)
         elif board.winner() == self.foe:
-            return -1 * board.size**2 - depth
+            return board.size**2 + 1 - depth
         return 0
 
     def evaluate_best_move(self, board: Board) -> Square:
