@@ -160,12 +160,12 @@ class Board:
         """
         return self.table[square] == Symbol.EMPTY
 
-    def get_connection(self) -> list[Square]:
-        """Check for connected tiles
-
-        Returns:
-            list[Square]: List of connected squares
+    def get_connection(self, winner: bool=False, gui: bool=True) -> list[Square]:
+        """Check for connected tiles,returns the list of connected squares
+        So just collecting all winning lines instead of returning the first one. 
+        This is just for us to choose the appropriate win based on the current turn and flags.
         """
+        connections=[]
         for row in self.win_conditions:
             checklist = []
             for square in row:
@@ -173,8 +173,23 @@ class Board:
                     continue
                 checklist.append(self.square_value(square))
             if len(checklist) == self.size and len(set(checklist)) == 1:
-                return row
-        return []
+                connections.append(row)
+        if not connections:
+            return []
+        elif len(connections) == 1:
+            return connections[0]
+        else:
+            # When multiple connections are existing then to decide based on current turn and flags.
+            if winner or gui:
+                if self.turn == self.square_value(connections[0][0]):
+                    return connections[1]
+                else:
+                    return connections[0]
+            else:
+                if self.turn == self.square_value(connections[0][0]):
+                    return connections[0]
+                else:
+                    return connections[1]
 
     def is_draw(self) -> bool:
         """Check for draw
@@ -185,20 +200,56 @@ class Board:
         if len(self.empty_squares) == 0 and len(self.get_connection()) == 0:
             return True
         return False
+    
+    def last_move(self, gui: bool = False) -> bool:
+        """Checking if the current player/opponent are able too get a win with an extra move
+           after a three in a row has been formed by the pther palyer/bot.
+            returns bool: True if an extra winning move is possible, false otherwise.
+        """
+        connection = self.get_connection(gui=gui)
+        # If the connection belongs to the current turn, then an extra move isn't really applicable.
+        if connection and self.turn == self.square_value(connection[0]):
+            return False 
+        # Testing every empty square to see if placing the symbol results in a win.
+        for square in self.empty_squares:
+            self.push(square, self.turn)
+            if self.winnerHelper() == self.turn:
+                self.undo(square)
+                return True
+            self.undo(square)
+        return False
+    
+    def winnerHelper(self, winner: bool = False) -> Optional[Symbol]:
+        """For determinging a temporary winner based on the current board state,
+           ignoring the extra move possibility.
+        retuerns the winning symbol if a connection exists and if not nothing
+        """
+        connection = self.get_connection(winner=winner, gui=False)
+        if not connection:
+            return None
+        return self.square_value(connection[0])
 
     def winner(self) -> Optional[Symbol]:
         """Get the winner of the match
 
         Returns:
             Optional[Symbol]: Symbol of connected tiles if exists
-        """
+        
         connection = self.get_connection()
         if len(connection) == 0:
             return None
         elif self.square_value(connection[0]) == Symbol.CIRCLE:
             return Symbol.CIRCLE
         else:
-            return Symbol.CROSS
+            return Symbol.CROSS"""
+        #this is for detrming the final winner. the wining connections only valid if 
+        # opponent cant counter with extra move in this wild tictactoe game.
+        temp_winner = self.winnerHelper(winner=True)
+        if temp_winner and not self.final_move():
+            return temp_winner
+        return None
+
+
 
     def is_gameover(self) -> bool:
         """Check for gameover
