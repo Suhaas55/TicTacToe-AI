@@ -201,7 +201,7 @@ class Board:
             return True
         return False
     
-    def last_move(self, gui: bool = False) -> bool:
+    def final_move(self, gui: bool = False) -> bool:
         """Checking if the current player/opponent are able too get a win with an extra move
            after a three in a row has been formed by the pther palyer/bot.
             returns bool: True if an extra winning move is possible, false otherwise.
