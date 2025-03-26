@@ -56,11 +56,15 @@ class Engine:
         may allow the opponent to counter and win. And vice-versa if the opponent forms three in a 
         row, we are returning a positive value.
         """
-        if board.winner() == self.ai:
-            return -1 * (board.size**2 + 1 - depth)
-        elif board.winner() == self.foe:
-            return board.size**2 + 1 - depth
-        return 0
+        base_score = board.size**2 + 1 - depth #decreses w dpeth
+        winner_symbol = board.winner() #nothign if no one wins
+        if winner_symbol is None:
+            return 0
+        
+        if winner_symbol == self.foe: #cuz opopnent winnign initially is good for us
+            return base_score
+        else:
+            return -base_score
 
     def evaluate_best_move(self, board: Board) -> Square:
         best_move = self.minimax(board, True, 0, float('-inf'),

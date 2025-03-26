@@ -206,9 +206,9 @@ class Board:
            after a three in a row has been formed by the pther palyer/bot.
             returns bool: True if an extra winning move is possible, false otherwise.
         """
-        connection = self.get_connection(gui=gui)
+        winning_line = self.get_connection(gui=gui)
         # If the connection belongs to the current turn, then an extra move isn't really applicable.
-        if connection and self.turn == self.square_value(connection[0]):
+        if winning_line and self.square_value(winning_line[0]) == self.turn:
             return False 
         # Testing every empty square to see if placing the symbol results in a win.
         for square in self.empty_squares:
@@ -224,30 +224,22 @@ class Board:
            ignoring the extra move possibility.
         retuerns the winning symbol if a connection exists and if not nothing
         """
-        connection = self.get_connection(winner=winner, gui=False)
-        if not connection:
+        winning_squares = self.get_connection(winner=winner, gui=False)
+        if not winning_squares:
             return None
-        return self.square_value(connection[0])
+        return self.square_value(winning_squares[0])
 
     def winner(self) -> Optional[Symbol]:
-        """Get the winner of the match
-
-        Returns:
-            Optional[Symbol]: Symbol of connected tiles if exists
-        
-        connection = self.get_connection()
-        if len(connection) == 0:
-            return None
-        elif self.square_value(connection[0]) == Symbol.CIRCLE:
-            return Symbol.CIRCLE
-        else:
-            return Symbol.CROSS"""
         #this is for detrming the final winner. the wining connections only valid if 
-        # opponent cant counter with extra move in this wild tictactoe game.
-        temp_winner = self.winnerHelper(winner=True)
-        if temp_winner and not self.final_move():
-            return temp_winner
+        # opponent cant counter with extra move.
+        potential_winner = self.winnerHelper(winner=True)
+        if potential_winner:
+            can_counter =self.final_move()
+
+            if not can_counter:
+                return potential_winner
         return None
+
 
 
 
